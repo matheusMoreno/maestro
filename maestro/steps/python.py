@@ -15,9 +15,9 @@ LOGGER = logging.getLogger(__name__)
 class PythonStep(Step):
     """Step that executes a Python function."""
 
-    def _execute(self, inputs_override: Dict[str, Any]) -> Any:
+    def _execute(self, inputs_update: Dict[str, Any] = None) -> Any:
         """Execute a Python function based on it's path."""
-        inputs = {**self.inputs, **inputs_override}
+        inputs = {**self.inputs, **(inputs_update or {})}
         LOGGER.debug("Running function %s with inputs %s.", self.path, inputs)
 
         try:
@@ -26,7 +26,7 @@ class PythonStep(Step):
             LOGGER.info("Function %s ran successfully.", self.path)
             return outputs_values
         except Exception as exc:  # pylint: disable=broad-except
-            LOGGER.error("Fuction %s failed: %s", self.path, str(exc))
+            LOGGER.info("Fuction %s failed: %s", self.path, str(exc))
             raise FailedStepException(str(exc)) from exc
 
     def _import_function(self) -> Callable:

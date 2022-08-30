@@ -14,20 +14,20 @@ class StepFactory:
 
     def __init__(self) -> None:
         """Initialize step types dictionary."""
-        self._step_types: Dict[str, Callable] = {}
+        self.step_types: Dict[str, Callable] = {}
 
     def register(self, step_type: str, step_obj: Callable) -> None:
         """Register type class."""
         LOGGER.debug("Registering step of type %s.", step_type)
-        self._step_types[step_type] = step_obj
+        self.step_types[step_type] = step_obj
 
     def create(self, step_spec: Dict[str, Any]) -> Step:
         """Create a step class based on its type."""
         try:
             step_spec = step_spec.copy()
             step_type = step_spec.pop("type")
-            step_class = self._step_types[step_type]
-        except ValueError as exc:
+            step_class = self.step_types[step_type]
+        except KeyError as exc:
             raise TypeError(f"Step type {step_type} does not exist.") from exc
 
         LOGGER.debug("Building step %s with params %s.", step_type, step_spec)

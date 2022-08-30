@@ -23,9 +23,9 @@ class Step(ABC):
         self.inputs = inputs or {}
         self.outputs = outputs or []
 
-    def execute(self, inputs_override: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, inputs_update: Dict[str, Any] = None) -> Dict[str, Any]:
         """Execute the step and return a dictionary with the outputs."""
-        outputs_values = self._execute(inputs_override)
+        outputs_values = self._execute(inputs_update)
         return self._pack_outputs(outputs_values)
 
     def _pack_outputs(self, outputs: Any) -> Dict[str, Any]:
@@ -34,5 +34,5 @@ class Step(ABC):
         return dict(zip(self.outputs, outputs))
 
     @abstractmethod
-    def _execute(self, inputs_override: Dict[str, Any]) -> Any:
+    def _execute(self, inputs_update: Dict[str, Any] = None) -> Any:
         """Execute the step and return the raw outputs."""

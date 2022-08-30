@@ -1,5 +1,5 @@
 """Module with the Workflow class and auxiliary classes."""
 
-from maestro.workflow import workflow
+# pylama: ignore=W0611
 
-Workflow = workflow.Workflow
+from maestro.workflow.workflow import Workflow

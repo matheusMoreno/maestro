@@ -41,12 +41,28 @@ class Workflow:
             execution_inputs = variable_pool.get_values(current_step.inputs)
             try:
                 outputs = current_step.execute(execution_inputs)
-                context.set_current_step_as_successful(outputs)
+                context.set_current_step_as_successful()
                 variable_pool.set_outputs(current_step.name, outputs)
             except FailedStepException as exc:
                 context.set_current_step_as_failed(str(exc))
 
-        return variable_pool.get_values(self.outputs)
+        outputs = variable_pool.get_values(self.outputs)
+        self._print_execution_results(context, outputs)
+        return outputs
+
+    def _print_execution_results(
+        self, context: ExecutionContext, outputs: Dict[str, Any]
+    ) -> None:
+        """Print the execution results."""
+        print(
+            f"WORKFLOW: {self.name}",
+            "INPUTS:",
+            "\n".join([f"    |_ {k}: {v}" for k, v in self.inputs.items()]),
+            context.format_final_results(),
+            "OUTPUTS:",
+            "\n".join([f"    |_ {k}: {v}" for k, v in outputs.items()]),
+            sep="\n"
+        )
 
     @classmethod
     def from_dict(cls, spec: Dict[str, Any]) -> Workflow:

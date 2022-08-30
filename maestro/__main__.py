@@ -30,7 +30,7 @@ def command_line_interface() -> None:
     args = init_parser().parse_args()
     workflow_spec = get_workflow_json(args.workflow_path)
     workflow = Workflow.from_dict(workflow_spec)
-    print(workflow.execute())
+    workflow.execute()
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 """Module with the execution context abstraction."""
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Set
+from typing import List, Optional, Set
 
 from maestro.steps import Step
 
@@ -50,21 +50,41 @@ class ExecutionContext:
         self._current_step = self._ready_steps.pop()
         return self._current_step.step
 
-    def set_current_step_as_successful(self, outputs: Dict[str, Any]) -> None:
+    def set_current_step_as_successful(self) -> None:
         """Set current running step as successful."""
-        self._update_current_step(outputs, successful=True)
+        self._update_current_step(success=True)
         self._update_steps_dependent_on_successful_current_step()
 
     def set_current_step_as_failed(self, reason: str) -> None:
         """Set current running step as failed."""
-        self._update_current_step(reason, successful=False)
+        self._update_current_step(success=False, reason=reason)
         self._update_steps_dependent_on_failed_current_step()
 
-    def _update_current_step(self, attribute: Any, successful: bool) -> None:
+    def format_final_results(self) -> str:
+        """Format text with final results for logging."""
+        text = "SUCCESSFUL STEPS:"
+        if self._successful_steps:
+            for step_ctx in self._successful_steps:
+                text += f"\n    |_ {step_ctx.step.name}"
+        else:
+            text += " []"
+
+        text += "\nFAILED STEPS:"
+        if self._failed_steps:
+            for step_ctx in self._failed_steps:
+                text += f"\n    |_ {step_ctx.step.name}"
+                text += f"\n       Reason: {step_ctx.failed_reason}"
+        else:
+            text += " []"
+
+        return text
+
+    def _update_current_step(self, success: bool, reason: str = None) -> None:
         """Update the running step as successful or failed."""
-        attribute_to_set = "outputs" if successful else "failed_reason"
-        queue = self._successful_steps if successful else self._failed_steps
-        setattr(self._current_step, attribute_to_set, attribute)
+        queue = self._successful_steps
+        if not success:
+            self._current_step.failed_reason = reason
+            queue = self._failed_steps
         queue.add(self._current_step)
 
     def _get_dependent_steps(self, step_ctx: StepContext) -> Set[StepContext]:

@@ -1,6 +1,10 @@
 """Module with the variable pool abstraction."""
 
+import logging
 from typing import Any, Dict
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class VariablePool:
@@ -29,6 +33,7 @@ class VariablePool:
         self, entity: str, interface: str, values: Dict[str, Any]
     ) -> None:
         """Set values in the pool given a specific entity and interface."""
+        LOGGER.debug("Setting %s %s for entity %s.", interface, values, entity)
         self._pool.update({
             f"{{{{ {entity}.{interface}.{name} }}}}": value
             for name, value in values.items()

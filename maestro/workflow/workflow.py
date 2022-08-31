@@ -1,12 +1,16 @@
 """Module with the base Workflow abstraction."""
 
 from __future__ import annotations
+import logging
 from typing import Any, Dict, List
 
 from maestro.steps import Step, step_factory
 from maestro.exceptions import FailedStepException
 from maestro.workflow.execution_context import ExecutionContext
 from maestro.workflow.variable_pool import VariablePool
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Workflow:
@@ -24,45 +28,38 @@ class Workflow:
         self.steps = steps or []
         self.inputs = inputs or {}
         self.outputs = outputs or {}
+        self.last_execution = ExecutionContext()
 
     def execute(self) -> Dict[str, Any]:
         """Execute the workflow and return its outputs."""
-        context = ExecutionContext()
+        LOGGER.info("Executing workflow %s.", self.name)
+        execution = ExecutionContext()
         variable_pool = VariablePool()
 
         # Initialize variable pool and execution context
         variable_pool.set_inputs(self.name, self.inputs)
         for step in self.steps:
+            LOGGER.debug("Registering step %s.", step.name)
             variable_pool.set_inputs(step.name, step.inputs)
-            context.register_step(step)
+            execution.register_step(step)
 
-        while not context.finished:
-            current_step = context.get_next_step()
+        while not execution.finished:
+            current_step = execution.get_next_step()
             execution_inputs = variable_pool.get_values(current_step.inputs)
             try:
+                LOGGER.debug("Executing step %s.", current_step.name)
                 outputs = current_step.execute(execution_inputs)
-                context.set_current_step_as_successful()
+                execution.set_current_step_as_successful()
                 variable_pool.set_outputs(current_step.name, outputs)
             except FailedStepException as exc:
-                context.set_current_step_as_failed(str(exc))
+                LOGGER.warning("%s failed: %s", current_step.name, str(exc))
+                execution.set_current_step_as_failed(str(exc))
+
+        self.last_execution = execution
 
         outputs = variable_pool.get_values(self.outputs)
-        self._print_execution_results(context, outputs)
+        LOGGER.debug("Workflow execution outputs: %s", outputs)
         return outputs
-
-    def _print_execution_results(
-        self, context: ExecutionContext, outputs: Dict[str, Any]
-    ) -> None:
-        """Print the execution results."""
-        print(
-            f"WORKFLOW: {self.name}",
-            "INPUTS:",
-            "\n".join([f"    |_ {k}: {v}" for k, v in self.inputs.items()]),
-            context.format_final_results(),
-            "OUTPUTS:",
-            "\n".join([f"    |_ {k}: {v}" for k, v in outputs.items()]),
-            sep="\n"
-        )
 
     @classmethod
     def from_dict(cls, spec: Dict[str, Any]) -> Workflow:

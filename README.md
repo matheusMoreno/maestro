@@ -11,9 +11,9 @@ DAGs can be defined as a JSON file with four main fields:
 ```json
 {
     "name": "...",
-    "inputs": {...},
-    "steps": [...],
-    "outputs": {...}
+    "inputs": {"..."},
+    "steps": ["..."],
+    "outputs": {"..."}
 }
 ```
 
@@ -28,16 +28,16 @@ Steps inside the `"steps"` array must be defined with the following specificatio
     "name": "...",
     "type": "...",
     "path": "...",
-    "depends_on": [...],
-    "inputs": {...},
-    "outputs": [...]
+    "depends_on": ["..."],
+    "inputs": {"..."},
+    "outputs": ["..."]
 }
 ```
 
 The `"type"` field informs which kind of step it is, while the `"path"` field is used by
-the orchestrator to actually execute the step. The `"depends_on"` field is optional and,
-if passed, will be used to block the step's execution while the required steps are not
-yet complete.
+the orchestrator to resolve the executable's location. The `"depends_on"` field is optional
+and, if passed, will be used to block the step's execution while the required steps are
+not yet complete.
 
 You can pass an entity's input/output to another step using the reference format
 `{{ <entity name>.<inputs/outputs>.<variable name> }}`. For instance, the following
@@ -60,7 +60,9 @@ you **must** explictly define the `"depends_on"` field.
 Currently the only supported step type is `python_step`. In this type, the `"path"` field
 must be a fully qualified Python function path. For instance, the function `pow()` present
 in Python's `math` module would be called with `math.pow`. The inputs are passed as
-sequential arguments for the function.
+sequential arguments for the function. If you want to use user-defined functions, you must
+organize your project as a Python module and execute Maestro outside of it (as you can see
+in the [Examples](#examples) section).
 
 ## Installation
 

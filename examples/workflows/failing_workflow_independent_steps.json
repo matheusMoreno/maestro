@@ -1,0 +1,35 @@
+{
+    "name": "failing_square_numbers",
+    "inputs": {
+        "x": 4,
+        "y": "not a number"
+    },
+    "steps": [
+        {
+            "name": "square_x",
+            "type": "python_function",
+            "path": "examples.operations.square",
+            "inputs": {
+                "value": "{{ failing_square_numbers.inputs.x }}"
+            },
+            "outputs": [
+                "x_squared"
+            ]
+        },
+        {
+            "name": "square_y",
+            "type": "python_function",
+            "path": "examples.operations.square",
+            "inputs": {
+                "value": "{{ failing_square_numbers.inputs.y }}"
+            },
+            "outputs": [
+                "y_squared"
+            ]
+        }
+    ],
+    "outputs": {
+        "x_squared": "{{ square_x.outputs.x_squared }}",
+        "y_squared": "{{ square_y.outputs.y_squared }}"
+    }
+}

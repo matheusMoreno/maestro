@@ -1,0 +1,47 @@
+{
+    "name": "compute_sum_of_squares",
+    "inputs": {
+        "x": 4,
+        "y": 3
+    },
+    "steps": [
+        {
+            "name": "square_x",
+            "type": "python_function",
+            "path": "examples.operations.square",
+            "inputs": {
+                "value": "{{ compute_sum_of_squares.inputs.x }}"
+            },
+            "outputs": [
+                "x_squared"
+            ]
+        },
+        {
+            "name": "square_y",
+            "type": "python_function",
+            "path": "examples.operations.square",
+            "inputs": {
+                "value": "{{ compute_sum_of_squares.inputs.y }}"
+            },
+            "outputs": [
+                "y_squared"
+            ]
+        },
+        {
+            "name": "sum_squares",
+            "type": "python_function",
+            "path": "examples.operations.add",
+            "depends_on": ["square_x", "square_y"],
+            "inputs": {
+                "x_squared": "{{ square_x.outputs.x_squared }}",
+                "y_squared": "{{ square_y.outputs.y_squared }}"
+            },
+            "outputs": [
+                "sum_of_squares"
+            ]
+        }
+    ],
+    "outputs": {
+        "sum_of_squares": "{{ sum_squares.outputs.sum_of_squares }}"
+    }
+}

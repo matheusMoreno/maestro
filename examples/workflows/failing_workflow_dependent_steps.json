@@ -1,0 +1,34 @@
+{
+    "name": "failing_compute_circle_area",
+    "inputs": {
+        "radius": "not a number"
+    },
+    "steps": [
+        {
+            "name": "square_radius",
+            "type": "python_function",
+            "path": "examples.operations.square",
+            "inputs": {
+                "value": "{{ failing_compute_circle_area.inputs.radius }}"
+            },
+            "outputs": [
+                "radius_squared"
+            ]
+        },
+        {
+            "name": "multiply_square_radius_by_pi",
+            "type": "python_function",
+            "path": "examples.geometry.multiply_by_pi",
+            "depends_on": ["square_radius"],
+            "inputs": {
+                "value": "{{ square_radius.outputs.radius_squared }}"
+            },
+            "outputs": [
+                "circle_area"
+            ]
+        }
+    ],
+    "outputs": {
+        "circle_area": "{{ multiply_by_pi.outputs.circle_area }}"
+    }
+}

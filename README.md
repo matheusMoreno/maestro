@@ -45,11 +45,9 @@ spec will use the value of `"x"` specified in the workflow `my_workflow` inputs:
 
 ```json
 {
-    ...
     "inputs": {
         "x": "{{ my_workflow.inputs.x }}"
     },
-    ...
 }
 ```
 

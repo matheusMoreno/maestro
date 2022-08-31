@@ -5,6 +5,7 @@ import json
 from typing import Any, Dict
 
 from maestro.workflow import Workflow
+from maestro.workflow.formatter import ExecutionLogFormatter
 
 
 def init_parser() -> argparse.ArgumentParser:
@@ -28,9 +29,17 @@ def get_workflow_json(workflow_path: str) -> Dict[str, Any]:
 def command_line_interface() -> None:
     """Execute the command line interface script for the Maestro library."""
     args = init_parser().parse_args()
+
     workflow_spec = get_workflow_json(args.workflow_path)
     workflow = Workflow.from_dict(workflow_spec)
-    workflow.execute()
+    outputs = workflow.execute()
+
+    print(ExecutionLogFormatter(
+        workflow_name=workflow.name,
+        workflow_inputs=workflow.inputs,
+        execution_context=workflow.last_execution,
+        execution_outputs=outputs
+    ).format())
 
 
 if __name__ == "__main__":

@@ -28,38 +28,40 @@ class Workflow:
         self.steps = steps or []
         self.inputs = inputs or {}
         self.outputs = outputs or {}
-        self.last_execution = ExecutionContext()
+        self.last_context = ExecutionContext()
+        self.last_variable_pool = VariablePool()
 
     def execute(self) -> Dict[str, Any]:
         """Execute the workflow and return its outputs."""
         LOGGER.info("Executing workflow %s.", self.name)
-        execution = ExecutionContext()
-        variable_pool = VariablePool()
+        self._initialize_context_and_pool()
 
-        # Initialize variable pool and execution context
-        variable_pool.set_inputs(self.name, self.inputs)
-        for step in self.steps:
-            LOGGER.debug("Registering step %s.", step.name)
-            variable_pool.set_inputs(step.name, step.inputs)
-            execution.register_step(step)
-
-        while not execution.finished:
-            current_step = execution.get_next_step()
-            execution_inputs = variable_pool.get_values(current_step.inputs)
+        while not self.last_context.finished:
+            current_step = self.last_context.get_next_step()
+            inputs = self.last_variable_pool.get_values(current_step.inputs)
             try:
                 LOGGER.debug("Executing step %s.", current_step.name)
-                outputs = current_step.execute(execution_inputs)
-                execution.set_current_step_as_successful()
-                variable_pool.set_outputs(current_step.name, outputs)
+                outputs = current_step.execute(inputs)
+                self.last_context.set_current_step_as_successful()
+                self.last_variable_pool.set_outputs(current_step.name, outputs)
             except FailedStepException as exc:
                 LOGGER.warning("%s failed: %s", current_step.name, str(exc))
-                execution.set_current_step_as_failed(str(exc))
+                self.last_context.set_current_step_as_failed(str(exc))
 
-        self.last_execution = execution
-
-        outputs = variable_pool.get_values(self.outputs)
+        outputs = self.last_variable_pool.get_values(self.outputs)
         LOGGER.debug("Workflow execution outputs: %s", outputs)
         return outputs
+
+    def _initialize_context_and_pool(self) -> None:
+        """Initialize a new context and variable pool for the execution."""
+        self.last_context = ExecutionContext()
+        self.last_variable_pool = VariablePool()
+
+        self.last_variable_pool.set_inputs(self.name, self.inputs)
+        for step in self.steps:
+            LOGGER.debug("Registering step %s.", step.name)
+            self.last_variable_pool.set_inputs(step.name, step.inputs)
+            self.last_context.register_step(step)
 
     @classmethod
     def from_dict(cls, spec: Dict[str, Any]) -> Workflow:

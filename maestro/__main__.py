@@ -37,7 +37,7 @@ def command_line_interface() -> None:
     print(ExecutionLogFormatter(
         workflow_name=workflow.name,
         workflow_inputs=workflow.inputs,
-        execution_context=workflow.last_execution,
+        execution_context=workflow.last_context,
         execution_outputs=outputs
     ).format())
 

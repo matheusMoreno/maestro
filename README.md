@@ -72,8 +72,8 @@ Maestro was developed and tested in Python 3.8.
 
 ## Usage
 
-To use the library, you can execute its main module while passing the path (absolute or
-relative) to a JSON containing the workflow specification:
+To run the orchestrator, you must execute its main module while passing the path (absolute
+or relative) to a JSON file containing the workflow specification:
 
 ```bash
 python -m maestro [WORKFLOW_PATH]

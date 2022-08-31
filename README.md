@@ -1,8 +1,7 @@
 # Maestro
 
-Maestro is a simple orchestration tool implemented with pure Python (and only
-standard libraries). It executes a series of steps defined in a workflow specification
-(a JSON file).
+Maestro is a simple orchestration tool implemented with pure Python and its
+standard libraries. It executes a series of steps defined in a workflow specification.
 
 ## File specification
 
@@ -19,7 +18,7 @@ DAGs can be defined as a JSON file with four main fields:
 
 All of them are relatively self-explanatory: you must define the workflow's name, its
 inputs (as key/value pairs, so they can be referenced later), its steps, and its outputs
-(which are also named, for easier comprehension).
+(which are also named and must be reference variables or literal values).
 
 Steps inside the `"steps"` array must be defined with the following specification:
 
@@ -39,9 +38,18 @@ the orchestrator to resolve the executable's location. The `"depends_on"` field 
 and, if passed, will be used to block the step's execution while the required steps are
 not yet complete.
 
+Currently the only supported step type is `python_step`. In this type, the `"path"` field
+must be a fully qualified Python function path. For instance, the function `pow()` present
+in Python's `math` module would be called with `math.pow`. The inputs are passed as
+sequential arguments for the function. If you want to use user-defined functions, you must
+organize your project as a Python module and execute Maestro outside of it (as you can see
+in the [Examples](#examples) section).
+
+### Reference variables
+
 You can pass an entity's input/output to another step using the reference format
-`{{ <entity name>.<inputs/outputs>.<variable name> }}`. For instance, the following
-spec will use the value of `"x"` specified in the workflow `my_workflow` inputs:
+`{{ <entity>.<"inputs" or "outputs">.<variable> }}`. For instance, the following
+spec will use the value of `x` specified as an input of a workflow named `my_workflow`:
 
 ```json
 {
@@ -55,18 +63,11 @@ This means that names should be unique across an entire specification, so that r
 variables can be correctly resolved. Also, if a step requires an output of another step,
 you **must** explictly define the `"depends_on"` field.
 
-Currently the only supported step type is `python_step`. In this type, the `"path"` field
-must be a fully qualified Python function path. For instance, the function `pow()` present
-in Python's `math` module would be called with `math.pow`. The inputs are passed as
-sequential arguments for the function. If you want to use user-defined functions, you must
-organize your project as a Python module and execute Maestro outside of it (as you can see
-in the [Examples](#examples) section).
-
 ## Installation
 
-There is no package specification for the project (i.e. you can't install it using pip),
-but since Maestro is implemented using only standard libraries, you can "install" it by
-adding the `maestro/` directory to a directory present in your Python PATH.
+Currently there is no package specification for the project (i.e. you can't install it
+using pip), but since Maestro is implemented using only standard libraries, you can
+"install" it by adding the `maestro/` directory to a directory present in your Python PATH.
 
 Maestro was developed and tested in Python 3.8.
 
